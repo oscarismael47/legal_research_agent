@@ -5,9 +5,12 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.memory import InMemorySaver
 from agents.deep_research.reasearch_multi_agent_full import build_graph
-from agents.common_utils.utils import format_messages
+from agents.common_utils.utils import format_messages, format_messages_as_str
 
 if __name__ == "__main__":
+
+    output_dir = Path(__file__).resolve().parent.parent / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     checkpointer = InMemorySaver()
 
@@ -16,7 +19,7 @@ if __name__ == "__main__":
     graph_image = reasearch_multi_agent_full.get_graph(xray=True).draw_mermaid_png()
 
     ## save graph image for visualization
-    with open("./static_images/reasearch_multi_agent_full_graph.png", "wb") as f:
+    with open(f"{output_dir}/reasearch_multi_agent_full_graph.png", "wb") as f:
         f.write(graph_image)
 
     # Run the workflow
@@ -37,4 +40,14 @@ if __name__ == "__main__":
     research_brief = """Compare Gemini and OpenAI Deep Research agents across capability, performance, pricing, and ideal research use cases."""
 
     result = reasearch_multi_agent_full.invoke({"messages": [HumanMessage(content=f"{research_brief}.")]}, config=thread)
+    final_report = result["final_report"]
+    supervisor_messages_str = format_messages_as_str(result["supervisor_messages"])
+
     format_messages(result["supervisor_messages"])
+
+    # save final_report as markdown file
+    with open(f"{output_dir}/final_report.md", "w", encoding="utf-8") as f:
+        f.write(final_report.strip() + "\n")
+
+    with open(f"{output_dir}/supervisor_messages.txt", "w", encoding="utf-8") as file:
+        file.write(supervisor_messages_str)

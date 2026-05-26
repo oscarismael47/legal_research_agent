@@ -56,6 +56,20 @@ def format_messages(messages):
         else:
             console.print(Panel(content, title=f"📝 {msg_type}", border_style="white"))
 
+def format_messages_as_str(messages):
+    """Return a single string representation for a list of messages.
+
+    Each message is formatted using `format_message_content` and preceded
+    by a short message-type header. Useful for saving messages to files.
+    """
+    parts = []
+    for m in messages:
+        msg_type = m.__class__.__name__.replace('Message', '')
+        content = format_message_content(m)
+        parts.append(f"{msg_type} Message\n\n{content}")
+
+    return "\n\n".join(parts)
+
 def format_message(messages):
     """Alias for format_messages for backward compatibility"""
     return format_messages(messages)
